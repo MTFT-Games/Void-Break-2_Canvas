@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Void Break 2: About</title>
+
+	<!-- Compatibility and responsiveness meta tags -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Bulma -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+
+	<!-- Font awesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+	<!-- TODO: Add a font -->
+	<!-- Navbar component -->
+	<script type="module" src="src/components/nav-header.js"></script>
+</head>
+
+<body class="has-background-dark has-text-light">
+	<nav-header data-active="about"></nav-header>
+
+	<div class="hero p-2">
+
+		<div class="hero-body content">
+			<h2 class="subtitle has-text-light">Void Break 2</h2>
+			<img style="float:right;width:40%" src="media/images/in-progress.png" alt="A Void Break game in progress">
+			<p>
+				Void Break is an arcade style game based heavily off of Asteroids with some
+				inspiration from Nova Drift and Bosconian. It's built in JavaScript with
+				Canvas for graphics and Howler for sound effects.
+			</p>
+			<p>
+				The game plays very similar to Asteroids in the basic concepts and objective
+				but varies in several ways. The first of which is the movement style, where
+				in Asteroids there is no friction whatsoever, here there is a good bit of
+				friction. This produces a very floaty movement system that is a bit more
+				comfortable to control while still placing emphasis on the movement and
+				thinking a step ahead of where the character is.
+			</p>
+			<p>
+				Another deviation is the camera and world. In both Asteroids and Nova Drift
+				the world is confined to the edges of the view and upon hitting the edge,
+				the character is warped to the other side. In Void Break, the world is
+				much larger with the camera staying centered on the player but it still
+				keeps the ability to wrap around the world seamlessly by using a looping
+				background and showing the other side of the world over the edges.
+			</p>
+			<p>
+				The health system uses a shield and health bar instead of lives and the
+				shield starts to replenish after several seconds of not taking damage.
+			</p>
+			<p>
+				The asteroids are spawned with a size and frequency dependant on the
+				current score and the number of asteroids already in existence. The
+				shape is randomly generated for each asteroid and velocity as well
+				as initial placement are random. Upon breaking an asteroid, it will
+				fragment into others if it is large enough and increment the score.
+			</p>
+		</div>
+	</div>
+</body>
+
+</html>
