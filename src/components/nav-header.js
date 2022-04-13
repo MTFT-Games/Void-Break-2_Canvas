@@ -13,9 +13,12 @@ template.innerHTML = `
 	.navbar {
 		background-image: url(media/images/backgrounds/large/purple/purple-nebula-5.jpg);
 	}
+	.navbar-menu {
+		background: transparent;
+	}
 </style>
 <header>
-	<nav class='navbar'>
+	<nav class='navbar py-3'>
 		<!-- Brand and burger -->
 		<div class='navbar-brand'>
 			<a href='about.html' class='navbar-item'>
