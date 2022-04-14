@@ -148,8 +148,8 @@ class VoidBreak extends HTMLElement {
 					{x: this.canvas.width / 2 - 90, y: this.canvas.height / 2 + 130, w: 185, h: 75})) {
 					if (this.mouseState % 2 == 1) {
 						this.ctx.fillStyle = 'darkRed';
-					}else if (false/*Mouseup after mousedown*/) {
-						
+					}else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
+						this.state = 'game';
 					}else {
 						this.ctx.fillStyle = 'coral';
 					}
