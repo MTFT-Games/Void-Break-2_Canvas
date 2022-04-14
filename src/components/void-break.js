@@ -1,3 +1,5 @@
+import { testAABB } from "../utilities.js";
+
 //#region Canvas element
 const template = document.createElement('template');
 template.innerHTML = `
@@ -32,8 +34,30 @@ class VoidBreak extends HTMLElement {
 			this.canvas.height = this.resolution;
 		};
 
+		// Input
+		this.canvas.onmousemove = (e) => {
+			// relationship bitmap vs. element
+			const scaleX = this.canvas.width / this.canvas.offsetWidth;
+			const scaleY = this.canvas.height / this.canvas.offsetHeight;
+		
+			this.mousePos = {
+				x: (e.clientX) * scaleX,
+				y: (e.clientY - this.canvas.offsetTop) * scaleY
+			};
+		};
+		this.canvas.onmousedown = this.canvas.onmouseup = (e) => {
+			this.mouseState = e.buttons;
+		};
+		this.canvas.oncontextmenu = (e) => {
+			e.preventDefault();
+		};
+		
+
 		// init
 		document.defaultView.onresize();
+		this.mousePos = {x: 0, y: 0};
+		this.mouseState = 0;
+		this.lastMouseState = 0;
 		this.state = 'loading';
 		this.loading = 0;
 		this.lastFrameTime = window.performance.now();
@@ -43,11 +67,6 @@ class VoidBreak extends HTMLElement {
 	// Draw a loading screen
 	drawLoading(percent) {
 		this.ctx.save();
-
-		// Clear
-		this.ctx.fillStyle = 'black';
-		this.ctx.rect(0, 0, this.canvas.width, this.canvas.height);
-		this.ctx.fill();
 
 		this.ctx.fillStyle = 'white';
 		this.ctx.strokeStyle = 'white';
@@ -82,29 +101,30 @@ class VoidBreak extends HTMLElement {
 		const deltaT = frameTime - this.lastFrameTime;
 		this.lastFrameTime = frameTime;
 
+		// Clear
+		this.ctx.fillStyle = 'black';
+		this.ctx.rect(0, 0, this.canvas.width, this.canvas.height);
+		this.ctx.fill();
+
 		switch (this.state) {
 			case 'loading':
 				this.drawLoading(this.loading);
 				break;
 
 			case 'main menu':
-				// Draw main menu
 				this.ctx.save();
 
-				// Clear
-				this.ctx.fillStyle = 'black';
-				this.ctx.rect(0, 0, this.canvas.width, this.canvas.height);
-				this.ctx.fill();
-
-				// Draw background
+				//#region Draw background
 				this.ctx.save();
 				let scale = this.resolution / 1024;
 				if (this.canvas.width > this.canvas.height) scale = this.canvas.width / 1024;
 				this.ctx.scale(scale, scale);
 				this.ctx.drawImage(this.images.purple6, 0, 0);
 				this.ctx.restore();
+				//#endregion
 
-				// Draw logo text TODO: should make a proper logo
+				//#region Draw logo text TODO: should make a proper logo
+				this.ctx.save();
 				this.ctx.fillStyle = 'red';
 				this.ctx.strokeStyle = 'white';
 				this.ctx.textAlign = 'center';
@@ -113,6 +133,38 @@ class VoidBreak extends HTMLElement {
 				this.ctx.strokeText("VOID", this.canvas.width / 2, this.canvas.height / 2 - 300);
 				this.ctx.fillText("BREAK", this.canvas.width / 2, this.canvas.height / 2 - 80);
 				this.ctx.strokeText("BREAK", this.canvas.width / 2, this.canvas.height / 2 - 80);
+				this.ctx.restore();
+				//#endregion
+
+				//#region Start button TODO: Maybe make it a reusable function to draw and check a button
+				this.ctx.save();
+				
+				// Debug show hitbox
+				this.ctx.fillStyle = 'red';
+				//this.ctx.fillRect(this.canvas.width / 2 - 90, this.canvas.height / 2 + 130, 185, 75);
+				
+				//#region Test for mouse hover and click
+				if (testAABB({x: this.mousePos.x, y: this.mousePos.y, w: 0, h: 0},
+					{x: this.canvas.width / 2 - 90, y: this.canvas.height / 2 + 130, w: 185, h: 75})) {
+					if (this.mouseState % 2 == 1) {
+						this.ctx.fillStyle = 'darkRed';
+					}else if (false/*Mouseup after mousedown*/) {
+						
+					}else {
+						this.ctx.fillStyle = 'coral';
+					}
+				}
+				//#endregion
+
+				//#region Draw button
+				this.ctx.strokeStyle = 'white';
+				this.ctx.textAlign = 'center';
+				this.ctx.font = '100px Futura';
+				this.ctx.fillText("Start", this.canvas.width / 2, this.canvas.height / 2 + 200);
+				this.ctx.strokeText("Start", this.canvas.width / 2, this.canvas.height / 2 + 200);
+				this.ctx.restore();
+				//#endregion
+				//#endregion
 
 				this.ctx.restore();
 				break;
@@ -120,6 +172,9 @@ class VoidBreak extends HTMLElement {
 			default:
 				break;
 		}
+
+		// Set last mouse state
+		this.lastMouseState = this.mouseState;
 	}
 }
 
