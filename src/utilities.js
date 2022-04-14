@@ -6,7 +6,7 @@
  * @param {*} B The second object.
  * @returns True if collision detected.
  */
-function simpleCircleCollisionCheck(A, B) {
+export function simpleCircleCollisionCheck(A, B) {
     let ACircle = { x: A.x, y: A.y };
     let BCircle = { x: B.x, y: B.y };
     if (A.width > A.height) {
@@ -26,6 +26,17 @@ function simpleCircleCollisionCheck(A, B) {
     if (distSqr <= minDistSqr) {
         return true;
     }
+}
+
+/**
+ * Checks for collisions between two rectangles by using Axis Aligned Bounding Boxes.
+ * 
+ * @param {*} A The first object.
+ * @param {*} B The second object.
+ * @returns True if collision detected.
+ */
+export function testAABB(A, B) {
+    return (A.x + A.w > B.x) && (A.x < B.x + B.w) && (A.y + A.h > B.y) && (A.y < B.y + B.h);
 }
 
 /**
