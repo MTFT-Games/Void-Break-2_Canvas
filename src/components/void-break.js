@@ -39,7 +39,7 @@ class VoidBreak extends HTMLElement {
 			// relationship bitmap vs. element
 			const scaleX = this.canvas.width / this.canvas.offsetWidth;
 			const scaleY = this.canvas.height / this.canvas.offsetHeight;
-		
+
 			this.mousePos = {
 				x: (e.clientX) * scaleX,
 				y: (e.clientY - this.canvas.offsetTop) * scaleY
@@ -51,11 +51,11 @@ class VoidBreak extends HTMLElement {
 		this.canvas.oncontextmenu = (e) => {
 			e.preventDefault();
 		};
-		
+
 
 		// init
 		document.defaultView.onresize();
-		this.mousePos = {x: 0, y: 0};
+		this.mousePos = { x: 0, y: 0 };
 		this.mouseState = 0;
 		this.lastMouseState = 0;
 		this.state = 'loading';
@@ -65,7 +65,7 @@ class VoidBreak extends HTMLElement {
 	}
 
 	// Draw a loading screen
-	drawLoading(percent) {
+	drawLoading(percent, time) {
 		this.ctx.save();
 
 		this.ctx.fillStyle = 'white';
@@ -90,6 +90,12 @@ class VoidBreak extends HTMLElement {
 			30);
 		this.ctx.fill();
 
+		// Draw spinner
+		this.ctx.lineWidth = 5;
+		this.ctx.beginPath();
+		this.ctx.arc(this.canvas.width / 2 + 100, this.canvas.height / 2 - 30, 20, (2 * Math.PI) * ((time % 1000) / 1000), (2 * Math.PI) * ((time % 1000) / 1000) + ((2 / 3) * Math.PI));
+		this.ctx.stroke();
+
 		this.ctx.restore();
 	}
 
@@ -108,7 +114,7 @@ class VoidBreak extends HTMLElement {
 
 		switch (this.state) {
 			case 'loading':
-				this.drawLoading(this.loading);
+				this.drawLoading(this.loading, frameTime);
 				break;
 
 			case 'main menu':
@@ -138,14 +144,14 @@ class VoidBreak extends HTMLElement {
 
 				//#region Start button TODO: Maybe make it a reusable function to draw and check a button
 				this.ctx.save();
-				
+
 				// Debug show hitbox
 				this.ctx.fillStyle = 'red';
 				//this.ctx.fillRect(this.canvas.width / 2 - 90, this.canvas.height / 2 + 130, 185, 75);
-				
+
 				//#region Test for mouse hover and click
-				if (testAABB({x: this.mousePos.x, y: this.mousePos.y, w: 0, h: 0},
-					{x: this.canvas.width / 2 - 90, y: this.canvas.height / 2 + 130, w: 185, h: 75})) {
+				if (testAABB({ x: this.mousePos.x, y: this.mousePos.y, w: 0, h: 0 },
+					{ x: this.canvas.width / 2 - 90, y: this.canvas.height / 2 + 130, w: 185, h: 75 })) {
 					if (this.mouseState % 2 == 1) {
 						this.ctx.fillStyle = 'darkRed';
 					}else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
