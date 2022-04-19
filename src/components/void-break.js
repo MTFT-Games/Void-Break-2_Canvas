@@ -59,6 +59,7 @@ class VoidBreak extends HTMLElement {
 		this.mousePos = { x: 0, y: 0 };
 		this.mouseState = 0;
 		this.lastMouseState = 0;
+		this.sounds = {};
 		this.state = 'loading';
 		this.loading = 0;
 		this.lastFrameTime = window.performance.now()/1000.0;

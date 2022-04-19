@@ -10,21 +10,17 @@ const imageSources = {
 };
 
 // Load sounds
-const sounds = {};
-
-sounds.shoot1 = new Howl({ src: ['media/sounds/shoot1.wav'] });
-sounds.shoot1.volume(0.3);
+game.sounds.shoot1 = new Howl({ src: ['media/sounds/shoot1.wav'] });
+game.sounds.shoot1.volume(0.3);
 game.loading += 100.0 / loadingTotal;
 
-sounds.hit1 = new Howl({ src: ['media/sounds/hit1.wav'] });
-sounds.hit1.volume(0.5);
+game.sounds.hit1 = new Howl({ src: ['media/sounds/hit1.wav'] });
+game.sounds.hit1.volume(0.5);
 game.loading += 100.0 / loadingTotal;
 
-sounds.hit2 = new Howl({ src: ['media/sounds/hit2.wav'] });
-sounds.hit2.volume(0.5);
+game.sounds.hit2 = new Howl({ src: ['media/sounds/hit2.wav'] });
+game.sounds.hit2.volume(0.5);
 game.loading += 100.0 / loadingTotal;
-
-game.sounds = sounds;
 
 // Load images
 for (let imageName in imageSources) {
