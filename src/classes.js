@@ -95,6 +95,39 @@ export class Player extends GameObject {
 		ctx.closePath();
 		ctx.fill();
 		ctx.restore();
+
+		// Draw ui
+		
+		//health and shield
+		ctx.save();
+		ctx.translate(canvas.width/2, canvas.height - 50);
+		ctx.scale(3, 1);
+
+		//health bar
+		//background
+		ctx.fillStyle = '#3f3f3f';
+		ctx.beginPath();
+		ctx.rect(-this.health.max/2, 10, this.health.max, 20);
+		ctx.fill();
+		//forground
+		ctx.fillStyle = '#cf0000';
+		ctx.beginPath();
+		ctx.rect(-this.health.current/2, 10, this.health.current, 20);
+		ctx.fill();
+
+		//shield bar
+		//background
+		ctx.fillStyle = '#3f3f3f';
+		ctx.beginPath();
+		ctx.rect(-this.shield.max/2, -20, this.shield.max, 20);
+		ctx.fill();
+		//forground
+		ctx.fillStyle = '#0000cf';
+		ctx.beginPath();
+		ctx.rect(-this.shield.current/2, -20, this.shield.current, 20);
+		ctx.fill();
+
+		ctx.restore();
 	}
 
 	/**
