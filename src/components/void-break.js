@@ -1,3 +1,4 @@
+import { Player } from "../classes.js";
 import { testAABB } from "../utilities.js";
 
 //#region Canvas element
@@ -57,9 +58,12 @@ class VoidBreak extends HTMLElement {
 		// init
 		document.defaultView.onresize();
 		this.mousePos = { x: 0, y: 0 };
+		this.worldSize = 0; // TODO set this
 		this.mouseState = 0;
 		this.lastMouseState = 0;
 		this.sounds = {};
+		this.asteroids = []; // TODO: maybe make an asteroid manager
+		this.player = new Player({ x: 0, y: 0 }, this);
 		this.state = 'loading';
 		this.loading = 0;
 		this.lastFrameTime = window.performance.now()/1000.0;
@@ -175,6 +179,16 @@ class VoidBreak extends HTMLElement {
 				//#endregion
 
 				this.ctx.restore();
+				break;
+
+			case 'game':
+				this.player.update(deltaT);
+				// update asteroids
+
+				this.player.checkCollisions();
+
+				// draw asteroids
+				this.player.draw();
 				break;
 
 			default:
