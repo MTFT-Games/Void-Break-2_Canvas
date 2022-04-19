@@ -68,7 +68,7 @@ class VoidBreak extends HTMLElement {
 					break;
 
 				case 32: // space
-					if (!player.firing) {
+					if (!this.player.firing) {
 						this.player.startFiring = true;
 					}
 					break;
