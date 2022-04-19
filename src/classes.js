@@ -12,15 +12,15 @@ export class GameObject {
 	}
 
 	move(deltaT) {
-		this.pos.x += this.vel.x;
-		this.pos.y += this.vel.y;
+		this.pos.x += this.vel.x * deltaT;
+		this.pos.y += this.vel.y * deltaT;
 	}
 
 	update(deltaT) {
 		this.move(deltaT);
 
 		//#region World wrapping
-		if (this.pos.x < this.worldSize) {
+		if (this.pos.x < 0) {
 			this.pos.x += this.worldSize;
 		} else if (this.pos.x > this.worldSize) {
 			this.pos.x -= this.worldSize;
@@ -52,7 +52,7 @@ export class Player extends GameObject {
 	reset() {
 		// Motion stats
 		this.friction = 0.9;
-		this.vel = { x: this.worldSize / 3, y: -this.worldSize / 3 };
+		this.vel = { x: this.worldSize / 2, y: -this.worldSize / 2 };
 		this.thrust = 1200.0;
 		this.turnSpeed = 180.0;
 		this.turning = "";
