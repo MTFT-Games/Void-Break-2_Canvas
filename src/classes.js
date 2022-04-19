@@ -42,8 +42,6 @@ export class Player extends GameObject {
 		super(pos, { x: 0, y: 0 }, 0, game.worldSize);
 		this.sounds = game.sounds;
 		this.game = game;
-
-		this.reset();
 	}
 
 	/**

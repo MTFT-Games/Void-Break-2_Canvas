@@ -98,6 +98,51 @@ class VoidBreak extends HTMLElement {
 		};
 		//#endregion
 
+		//#region Tutorials
+		this.tutorials = {
+			ui: {
+				activate() { time = 10; }, time: 0, draw(game) {
+					const canvas = game.canvas;
+					const ctx = game.ctx;
+
+					ctx.save();
+					ctx.translate(canvas.width / 2, canvas.height - 50);
+					
+					ctx.textAlign = 'center';
+					ctx.font = '30px Futura';
+					ctx.fillText("Health", 0, this.canvas.height / 2 + 200);
+
+					ctx.scale(3, 1);
+					//health bar outline
+					//background
+					ctx.fillStyle = '#3f3f3f';
+					ctx.beginPath();
+					ctx.rect(-this.health.max / 2, 10, this.health.max, 20);
+					ctx.fill();
+					//forground
+					ctx.fillStyle = '#cf0000';
+					ctx.beginPath();
+					ctx.rect(-this.health.current / 2, 10, this.health.current, 20);
+					ctx.fill();
+
+					//shield bar
+					//background
+					ctx.fillStyle = '#3f3f3f';
+					ctx.beginPath();
+					ctx.rect(-this.shield.max / 2, -20, this.shield.max, 20);
+					ctx.fill();
+					//forground
+					ctx.fillStyle = '#0000cf';
+					ctx.beginPath();
+					ctx.rect(-this.shield.current / 2, -20, this.shield.current, 20);
+					ctx.fill();
+
+					ctx.restore();
+				}
+			}
+		};
+		//#endregion
+
 		// init
 		document.defaultView.onresize();
 		this.mousePos = { x: 0, y: 0 };
@@ -204,6 +249,7 @@ class VoidBreak extends HTMLElement {
 					if (this.mouseState % 2 == 1) {
 						this.ctx.fillStyle = 'darkRed';
 					} else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
+						this.player.reset();
 						this.state = 'game';
 					} else {
 						this.ctx.fillStyle = 'coral';
