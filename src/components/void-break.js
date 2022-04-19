@@ -246,6 +246,11 @@ class VoidBreak extends HTMLElement {
 
 						// draw asteroids
 
+						// Draw bullets
+						this.player.bullets.forEach(bullet => {
+							bullet.draw();
+						});
+
 						this.ctx.restore();
 					}
 				}

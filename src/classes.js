@@ -52,7 +52,7 @@ export class Player extends GameObject {
 	reset() {
 		// Motion stats
 		this.friction = 0.9;
-		this.vel = { x: this.worldSize / 2, y: -this.worldSize / 2 };
+		this.vel = { x: this.worldSize / 3, y: -this.worldSize / 3 };
 		this.thrust = 1200.0;
 		this.turnSpeed = 180.0;
 		this.turning = "";
@@ -149,6 +149,12 @@ export class Player extends GameObject {
 				this.shield.current = this.shield.max;
 			}
 		}
+
+		// Update bullets
+		this.bullets.forEach(bullet => {
+			bullet.update(deltaT);
+		});
+		this.bullets = this.bullets.filter(e => e.lifetime > 0);
 	}
 
 	checkCollisions() {
@@ -177,6 +183,10 @@ export class Player extends GameObject {
 				this.damage(cappedAstDmg);
 				asteroid.damage(this.health.max);
 			}
+		});
+
+		this.bullets.forEach(bullet => {
+			bullet.checkCollisions();
 		});
 	}
 
@@ -219,79 +229,72 @@ export class Player extends GameObject {
 	}
 }
 
-// class Bullet extends PIXI.Graphics {
-// 	constructor(parent) {
-// 		super();
-// 		// Draw shape.
-// 		if (parent.bullet.enemy) {
-// 			this.lineStyle(1, 0xFF0000, 1);
-// 		} else {
-// 			this.lineStyle(1, 0xFFFFFF, 1);
-// 		}
-// 		this.beginFill(0xFFFFFF);
-// 		this.moveTo(0, -2);
-// 		this.lineTo(1.5, 2);
-// 		this.lineTo(0, 1);
-// 		this.lineTo(-1.5, 2);
-// 		this.lineTo(0, -2);
-// 		this.endFill();
-// 		this.scale.set(parent.bullet.size);
+class Bullet extends GameObject {
+	constructor(parent) {
+		super(
+			{
+				x: parent.pos.x + parent.vel.x * parent.projectiles.cooldown,
+				y: parent.pos.y + parent.vel.y * parent.projectiles.cooldown
+			},
+			{
+				x: parent.vel.x + parent.bullet.speed * Math.sin(parent.angle * (Math.PI / 180)),
+				y: parent.vel.y - parent.bullet.speed * Math.cos(parent.angle * (Math.PI / 180))
+			},
+			parent.angle,
+			parent.worldSize);
 
-// 		world.addChild(this);
+		this.parent = parent;
+		this.lifetime = parent.bullet.lifetime;
+		this.update(-parent.projectiles.cooldown);
+	}
 
-// 		// Start position at parent
-// 		this.x = parent.x + parent.vel.x * parent.projectiles.cooldown;
-// 		this.y = parent.y - parent.vel.y * parent.projectiles.cooldown;
-// 		this.angle = parent.angle;
-// 		this.vel = {
-// 			x: parent.vel.x + parent.bullet.speed * Math.sin(this.angle * (Math.PI / 180)),
-// 			y: parent.vel.y + parent.bullet.speed * Math.cos(this.angle * (Math.PI / 180))
-// 		};
+	draw() {
+		const canvas = this.parent.game.canvas;
+		const ctx = this.parent.game.ctx;
+		ctx.save();
 
-// 		this.damage = parent.bullet.damage;
-// 		this.lifetime = parent.bullet.lifetime;
-// 		this.update(-parent.projectiles.cooldown);
-// 	}
+		// Draw shape.
+		ctx.translate(this.pos.x, this.pos.y);
+		ctx.scale(2 * this.parent.bullet.size,2 * this.parent.bullet.size);
+		if (this.parent.bullet.enemy) {
+			ctx.fillStyle = 'red';
+		} else {
+			ctx.fillStyle = 'white';
+		}
+		ctx.beginPath();
+		ctx.moveTo(0, -2);
+		ctx.lineTo(1.5, 2);
+		ctx.lineTo(0, 1);
+		ctx.lineTo(-1.5, 2);
+		ctx.closePath();
+		ctx.fill();
+		ctx.restore();
+	}
 
-// 	/**
-// 	 * Update the state of the bullet.
-// 	 *
-// 	 * Apply velocity, screen wrap, check collision, and tick down lifetime.
-// 	 *
-// 	 * @param {*} _dt Probably not necessary since dt is script scope.
-// 	 */
-// 	update(_dt) {
-// 		// Move
-// 		this.x += this.vel.x * _dt;
-// 		this.y -= this.vel.y * _dt;
+	/** 
+	 * Update the state of the bullet.
+	 *
+	 * Apply velocity, screen wrap, check collision, and tick down lifetime.
+	 *
+	 * @param {*} _dt Probably not necessary since dt is script scope.
+	 */
+	update(deltaT) {
+		super.update(deltaT);
 
-// 		// Screen wrap
-// 		if (this.x > worldSize) {
-// 			this.x -= worldSize;
-// 		} else if (this.x < 0) {
-// 			this.x += worldSize;
-// 		}
-// 		if (this.y > worldSize) {
-// 			this.y -= worldSize;
-// 		} else if (this.y < 0) {
-// 			this.y += worldSize;
-// 		}
+		// Tick down lifetime and delete if up.
+		this.lifetime -= deltaT;
+	}
 
-// 		// Check collisions with asteroids
-// 		asteroids.forEach(asteroid => {
-// 			if (this.lifetime > 0 && simpleCircleCollisionCheck(this, asteroid)) {
-// 				asteroid.damage(this.damage);
-// 				this.lifetime = 0;
-// 			}
-// 		});
-
-// 		// Tick down lifetime and delete if up.
-// 		this.lifetime -= _dt;
-// 		if (this.lifetime < 0) {
-// 			world.removeChild(this);
-// 		}
-// 	}
-// }
+	checkCollisions() {
+		// Check collisions with asteroids
+		this.parent.game.asteroids.forEach(asteroid => {
+			if (simpleCircleCollisionCheck(this, asteroid)) {
+				asteroid.damage(this.parent.bullet.damage);
+				this.lifetime = 0;
+			}
+		});
+	}
+}
 
 // /**
 //  * An asteroid obstacle.
