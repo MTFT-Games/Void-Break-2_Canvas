@@ -107,35 +107,30 @@ class VoidBreak extends HTMLElement {
 
 					ctx.save();
 					ctx.translate(canvas.width / 2, canvas.height - 50);
-					
+
 					ctx.textAlign = 'center';
 					ctx.font = '30px Futura';
-					ctx.fillText("Health", 0, this.canvas.height / 2 + 200);
 
+					ctx.fillStyle = '#cf0000';
+					ctx.strokeStyle = 'white';
+					ctx.fillText("Health", 0, canvas.height / 2 + 200);
 					ctx.scale(3, 1);
 					//health bar outline
-					//background
-					ctx.fillStyle = '#3f3f3f';
 					ctx.beginPath();
-					ctx.rect(-this.health.max / 2, 10, this.health.max, 20);
-					ctx.fill();
-					//forground
-					ctx.fillStyle = '#cf0000';
-					ctx.beginPath();
-					ctx.rect(-this.health.current / 2, 10, this.health.current, 20);
-					ctx.fill();
+					ctx.rect(-game.player.health.current / 2, 10, game.player.health.current, 20);
+					ctx.stroke();
 
 					//shield bar
 					//background
-					ctx.fillStyle = '#3f3f3f';
-					ctx.beginPath();
-					ctx.rect(-this.shield.max / 2, -20, this.shield.max, 20);
-					ctx.fill();
-					//forground
-					ctx.fillStyle = '#0000cf';
-					ctx.beginPath();
-					ctx.rect(-this.shield.current / 2, -20, this.shield.current, 20);
-					ctx.fill();
+					// ctx.fillStyle = '#3f3f3f';
+					// ctx.beginPath();
+					// ctx.rect(-this.shield.max / 2, -20, this.shield.max, 20);
+					// ctx.fill();
+					// //forground
+					// ctx.fillStyle = '#0000cf';
+					// ctx.beginPath();
+					// ctx.rect(-this.shield.current / 2, -20, this.shield.current, 20);
+					// ctx.fill();
 
 					ctx.restore();
 				}
@@ -250,6 +245,7 @@ class VoidBreak extends HTMLElement {
 						this.ctx.fillStyle = 'darkRed';
 					} else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
 						this.player.reset();
+						this.tutorials.ui.activate();
 						this.state = 'game';
 					} else {
 						this.ctx.fillStyle = 'coral';
@@ -273,6 +269,10 @@ class VoidBreak extends HTMLElement {
 			case 'game':
 				this.player.update(deltaT);
 				// update asteroids
+				// tutorial update
+				for (const tutorial in this.tutorials) {
+					this.tutorials.tutorial.time -= deltaT;
+				}
 
 				this.player.checkCollisions();
 
