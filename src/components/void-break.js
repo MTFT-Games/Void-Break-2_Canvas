@@ -27,14 +27,15 @@ class VoidBreak extends HTMLElement {
 		this.canvas = this.shadowRoot.querySelector('canvas');
 		this.ctx = this.canvas.getContext('2d');
 
-		// Resolution and autosizing
+		//#region Resolution and autosizing
 		this.resolution = 1080; //TODO: Get this from localstorage or defaults json
 		document.defaultView.onresize = () => {
 			this.canvas.width = (this.offsetWidth / this.offsetHeight) * this.resolution;
 			this.canvas.height = this.resolution;
 		};
+		//#endregion
 
-		// Input
+		//#region Input
 		this.canvas.onmousemove = (e) => {
 			// relationship bitmap vs. element
 			const scaleX = this.canvas.width / this.canvas.offsetWidth;
@@ -51,7 +52,7 @@ class VoidBreak extends HTMLElement {
 		this.canvas.oncontextmenu = (e) => {
 			e.preventDefault();
 		};
-
+		//#endregion
 
 		// init
 		document.defaultView.onresize();
@@ -60,7 +61,7 @@ class VoidBreak extends HTMLElement {
 		this.lastMouseState = 0;
 		this.state = 'loading';
 		this.loading = 0;
-		this.lastFrameTime = window.performance.now();
+		this.lastFrameTime = window.performance.now()/1000.0;
 		this.loop();
 	}
 
@@ -93,7 +94,7 @@ class VoidBreak extends HTMLElement {
 		// Draw spinner
 		this.ctx.lineWidth = 5;
 		this.ctx.beginPath();
-		this.ctx.arc(this.canvas.width / 2 + 100, this.canvas.height / 2 - 30, 20, (2 * Math.PI) * ((time % 1000) / 1000), (2 * Math.PI) * ((time % 1000) / 1000) + ((2 / 3) * Math.PI));
+		this.ctx.arc(this.canvas.width / 2 + 100, this.canvas.height / 2 - 30, 20, (2 * Math.PI) * ((time % 1) / 1), (2 * Math.PI) * ((time % 1) / 1) + ((2 / 3) * Math.PI));
 		this.ctx.stroke();
 
 		this.ctx.restore();
@@ -103,7 +104,7 @@ class VoidBreak extends HTMLElement {
 		requestAnimationFrame(() => this.loop());
 
 		// Keep time
-		const frameTime = window.performance.now();
+		const frameTime = window.performance.now()/1000.0;
 		const deltaT = frameTime - this.lastFrameTime;
 		this.lastFrameTime = frameTime;
 
@@ -154,9 +155,9 @@ class VoidBreak extends HTMLElement {
 					{ x: this.canvas.width / 2 - 90, y: this.canvas.height / 2 + 130, w: 185, h: 75 })) {
 					if (this.mouseState % 2 == 1) {
 						this.ctx.fillStyle = 'darkRed';
-					}else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
+					} else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
 						this.state = 'game';
-					}else {
+					} else {
 						this.ctx.fillStyle = 'coral';
 					}
 				}
