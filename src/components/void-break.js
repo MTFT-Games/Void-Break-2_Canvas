@@ -58,7 +58,7 @@ class VoidBreak extends HTMLElement {
 		// init
 		document.defaultView.onresize();
 		this.mousePos = { x: 0, y: 0 };
-		this.worldSize = 0; // TODO set this
+		this.worldSize = 1080; // TODO set this
 		this.mouseState = 0;
 		this.lastMouseState = 0;
 		this.sounds = {};
@@ -187,8 +187,28 @@ class VoidBreak extends HTMLElement {
 
 				this.player.checkCollisions();
 
-				// draw asteroids
+				//#region Draw
+				this.ctx.save();
+				// Translate to world origin
+				this.ctx.translate(this.canvas.width/2 - this.player.pos.x, this.canvas.height/2 - this.player.pos.y);
+
+				// Translate to each of the 9 copies of the world
+				for (let x = -1; x < 2; x++) {
+					for (let y = -1; y < 2; y++) {
+						this.ctx.save();
+						this.ctx.translate(this.worldSize * x, this.worldSize * y);
+
+						// Draw background
+						this.ctx.drawImage(this.images.purple5, 0,0, this.worldSize, this.worldSize);
+
+						// draw asteroids
+
+						this.ctx.restore();
+					}
+				}
+				this.ctx.restore();
 				this.player.draw();
+				//#endregion
 				break;
 
 			default:
