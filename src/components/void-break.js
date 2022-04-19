@@ -53,12 +53,55 @@ class VoidBreak extends HTMLElement {
 		this.canvas.oncontextmenu = (e) => {
 			e.preventDefault();
 		};
+		document.onkeydown = (key) => {
+			switch (key.keyCode) {
+				case 87: // W
+					this.player.thrusting = true;
+					break;
+
+				case 65: // A
+					this.player.turning = "ccw";
+					break;
+
+				case 68: // D
+					this.player.turning = "cw";
+					break;
+
+				case 32: // space
+					if (!player.firing) {
+						this.player.startFiring = true;
+					}
+					break;
+
+				default:
+					break;
+			}
+		};
+		document.onkeyup = (key) => {
+			switch (key.keyCode) {
+				case 87: // W
+					this.player.thrusting = false;
+					break;
+
+				case 65: // A
+				case 68: // D
+					this.player.turning = "";
+					break;
+
+				case 32: // space
+					this.player.firing = false;
+					break;
+
+				default:
+					break;
+			}
+		};
 		//#endregion
 
 		// init
 		document.defaultView.onresize();
 		this.mousePos = { x: 0, y: 0 };
-		this.worldSize = 1080; // TODO set this
+		this.worldSize = 3000; // TODO set this
 		this.mouseState = 0;
 		this.lastMouseState = 0;
 		this.sounds = {};
@@ -66,7 +109,7 @@ class VoidBreak extends HTMLElement {
 		this.player = new Player({ x: 0, y: 0 }, this);
 		this.state = 'loading';
 		this.loading = 0;
-		this.lastFrameTime = window.performance.now()/1000.0;
+		this.lastFrameTime = window.performance.now() / 1000.0;
 		this.loop();
 	}
 
@@ -109,7 +152,7 @@ class VoidBreak extends HTMLElement {
 		requestAnimationFrame(() => this.loop());
 
 		// Keep time
-		const frameTime = window.performance.now()/1000.0;
+		const frameTime = window.performance.now() / 1000.0;
 		const deltaT = frameTime - this.lastFrameTime;
 		this.lastFrameTime = frameTime;
 
@@ -190,7 +233,7 @@ class VoidBreak extends HTMLElement {
 				//#region Draw
 				this.ctx.save();
 				// Translate to world origin
-				this.ctx.translate(this.canvas.width/2 - this.player.pos.x, this.canvas.height/2 - this.player.pos.y);
+				this.ctx.translate(this.canvas.width / 2 - this.player.pos.x, this.canvas.height / 2 - this.player.pos.y);
 
 				// Translate to each of the 9 copies of the world
 				for (let x = -1; x < 2; x++) {
@@ -199,7 +242,7 @@ class VoidBreak extends HTMLElement {
 						this.ctx.translate(this.worldSize * x, this.worldSize * y);
 
 						// Draw background
-						this.ctx.drawImage(this.images.purple5, 0,0, this.worldSize, this.worldSize);
+						this.ctx.drawImage(this.images.purple5, 0, 0, this.worldSize, this.worldSize);
 
 						// draw asteroids
 
