@@ -48,7 +48,6 @@ export class Player extends GameObject {
 	 * Resets player to initial state ready for a new game.
 	 */
 	reset() {
-		// TODO: use variable and make theses defaults changable
 		this.worldSize = this.game.worldSize;
 
 		// Motion stats
@@ -248,7 +247,6 @@ export class Player extends GameObject {
 	 * Spawns and launches bullets according to the projectile settings.
 	 */
 	shoot() {
-		// TODO: use a variable for the limit
 		if (this.bullets.length < this.bulletLimit) {
 			this.bullets.push(new Bullet(this));
 		}
