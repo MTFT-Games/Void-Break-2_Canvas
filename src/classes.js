@@ -6,8 +6,8 @@ import { simpleCircleCollisionCheck } from "./utilities.js";
 export class GameObject {
 	constructor(pos, vel = { x: 0, y: 0 }, angle = 0, worldSize) {
 		this.worldSize = worldSize;
-		this.pos = pos;
-		this.vel = vel;
+		this.pos = {x: pos.x, y: pos.y};
+		this.vel = {x: vel.x, y: vel.y};
 		this.angle = angle;
 	}
 
@@ -60,6 +60,7 @@ export class Player extends GameObject {
 		//this.x = 0;
 		//this.y = worldSize;
 		this.angle = 45;
+		this.radius = 16;
 
 		// Health and shields
 		this.health = { max: 100, current: 100 };
@@ -286,6 +287,7 @@ class Bullet extends GameObject {
 			parent.worldSize);
 
 		this.parent = parent;
+		this.radius = 4 * this.parent.bullet.size;
 		this.lifetime = parent.bullet.lifetime;
 		this.update(-parent.projectiles.cooldown);
 	}
@@ -297,6 +299,7 @@ class Bullet extends GameObject {
 
 		// Draw shape.
 		ctx.translate(this.pos.x, this.pos.y);
+		ctx.rotate(this.angle * (Math.PI / 180));
 		ctx.scale(2 * this.parent.bullet.size, 2 * this.parent.bullet.size);
 		if (this.parent.bullet.enemy) {
 			ctx.fillStyle = 'red';
@@ -338,120 +341,103 @@ class Bullet extends GameObject {
 	}
 }
 
-// /**
-//  * An asteroid obstacle.
-//  */
-// class Asteroid extends PIXI.Graphics {
-// 	constructor(size, _x, _y) {
-// 		super();
-// 		//#region Generate random jaggy circle like shape
-// 		// Start drawing
-// 		this.lineStyle(1, 0xFFFFFF, 1);
-// 		this.beginFill(0x404040);
+/**
+ * An asteroid obstacle.
+ */
+export class Asteroid extends GameObject {
+	constructor(size, pos, worldSize, sounds, array) {
+		super(pos, {x:0,y:0},360 * Math.random(), worldSize);
+		//#region Generate random jaggy circle like shape
+		this.points = [];
 
-// 		// Set settings
-// 		this.radius = size;
-// 		let delta = size / 3.0;
-// 		let min = size - (delta / 2.0);
-// 		let degreeStepMin = 5;
-// 		let degreeStepDelta = 20;
-// 		let currentAngle = 0;
-// 		let magnitude;
+		// Set settings
+		this.radius = 2*size;
+		let delta = this.radius / 3.0;
+		let min = this.radius - (delta / 2.0);
+		let degreeStepMin = 5;
+		let degreeStepDelta = 20;
+		let currentAngle = 0;
+		let magnitude;
 
-// 		// Generate shape
-// 		// Start with a point straight up
-// 		let initialMagnitude = min + (Math.random() * delta);
-// 		this.moveTo(0, -initialMagnitude);
-// 		currentAngle += degreeStepMin + (Math.random() * degreeStepDelta);
+		// Generate shape
+		// Start with a point straight up
+		let initialMagnitude = min + (Math.random() * delta);
+		this.points.push({x:0, y:-initialMagnitude});
+		currentAngle += degreeStepMin + (Math.random() * degreeStepDelta);
 
-// 		// Loop generating points around the circle until back at top
-// 		while (currentAngle < 360) {
-// 			// Get a random magnitude within limits.
-// 			magnitude = min + (Math.random() * delta);
-// 			this.lineTo(
-// 				magnitude * Math.sin(currentAngle * (Math.PI / 180)),
-// 				-magnitude * Math.cos(currentAngle * (Math.PI / 180))
-// 			);
+		// Loop generating points around the circle until back at top
+		while (currentAngle < 360) {
+			// Get a random magnitude within limits.
+			magnitude = min + (Math.random() * delta);
+			this.points.push({
+				x:magnitude * Math.sin(currentAngle * (Math.PI / 180)),
+				y:-magnitude * Math.cos(currentAngle * (Math.PI / 180))
+			});
 
-// 			// Advance by a random degree within limits.
-// 			currentAngle += degreeStepMin + (Math.random() * degreeStepDelta);
-// 		}
+			// Advance by a random degree within limits.
+			currentAngle += degreeStepMin + (Math.random() * degreeStepDelta);
+		}
+		//#endregion
 
-// 		// Close the shape and finish
-// 		this.lineTo(0, -initialMagnitude);
-// 		this.endFill();
-// 		//#endregion
+		this.health = size;
+		this.sounds = sounds;
+		this.asteroids = array;
 
-// 		// Set given position
-// 		this.x = _x;
-// 		this.y = _y;
+		// Randomize velocity
+		let speed = 10 + (Math.random() * (1000 / this.radius));
+		this.vel = {
+			x: speed * Math.sin(this.angle * (Math.PI / 180)),
+			y: speed * Math.cos(this.angle * (Math.PI / 180))
+		};
+	}
 
-// 		world.addChild(this);
+	draw(ctx) {
+		ctx.save();
+		ctx.strokeStyle = 'white';
+		ctx.fillStyle = '#404040';
 
-// 		this.health = size;
+		// Draw shape.
+		ctx.translate(this.pos.x, this.pos.y);
+		ctx.rotate(this.angle * (Math.PI / 180));
 
-// 		// Randomize velocity and rotation
-// 		let speed = 10 + (Math.random() * (1000 / size));
-// 		this.angle = 360 * Math.random();
-// 		this.vel = {
-// 			x: speed * Math.sin(this.angle * (Math.PI / 180)),
-// 			y: speed * Math.cos(this.angle * (Math.PI / 180))
-// 		};
-// 	}
+		ctx.beginPath();
+		ctx.moveTo(this.points[0].x, this.points[0].y);
+		for (let index = 1; index < this.points.length; index++) {
+			ctx.lineTo(this.points[index].x, this.points[index].y);
+		}
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+		ctx.restore();
+	}
 
-// 	/**
-// 	 * Applies damage to the asteroid and splits the asteroid if applicable.
-// 	 *
-// 	 * @param {*} amt
-// 	 */
-// 	damage(amt) {
-// 		// Damage
-// 		this.health -= amt;
-// 		sounds.hit1.play();
+	/**
+	 * Applies damage to the asteroid and splits the asteroid if applicable.
+	 *
+	 * @param {*} amt
+	 */
+	damage(amt) {
+		// Damage
+		this.health -= amt;
+		this.sounds.hit1.play();
 
-// 		// Destroy this
-// 		if (this.health <= 0) {
-// 			world.removeChild(this);
-// 			sounds.hit2.play();
+		// Destroy this
+		if (this.health <= 0) {
+			this.sounds.hit2.play();
 
-// 			// Add score
-// 			score++;
-// 			UI.score.current.text = score;
-// 			if (this.radius > 10) {
-// 				// Divide
-// 				// TODO: add original velocity to the new frags
-// 				let maxDivisions = Math.floor(this.radius / 5);
-// 				if (maxDivisions > 5) {
-// 					maxDivisions = 5;
-// 				}
-// 				let divisions = Math.floor(2 + (Math.random() * (maxDivisions - 1)));
-// 				for (let i = 0; i < divisions; i++) {
-// 					asteroids.push(new Asteroid(this.radius / divisions, this.x, this.y));
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	/**
-// 	 * Update the state of the asteroid.
-// 	 *
-// 	 * @param {*} _dt Probably not needed since dt is script scope.
-// 	 */
-// 	update(_dt) {
-// 		// Move
-// 		this.x += this.vel.x * _dt;
-// 		this.y -= this.vel.y * _dt;
-
-// 		// Screen wrap
-// 		if (this.x > worldSize) {
-// 			this.x -= worldSize;
-// 		} else if (this.x < 0) {
-// 			this.x += worldSize;
-// 		}
-// 		if (this.y > worldSize) {
-// 			this.y -= worldSize;
-// 		} else if (this.y < 0) {
-// 			this.y += worldSize;
-// 		}
-// 	}
-// }
+			
+			if (this.radius > 20) {
+				// Divide
+				// TODO: add original velocity to the new frags
+				let maxDivisions = Math.floor(this.radius / 10);
+				if (maxDivisions > 5) {
+					maxDivisions = 5;
+				}
+				let divisions = Math.floor(2 + (Math.random() * (maxDivisions - 1)));
+				for (let i = 0; i < divisions; i++) {
+					this.asteroids().push(new Asteroid(this.radius / 2 / divisions, this.pos, this.worldSize, this.sounds, this.asteroids));
+				}
+			}
+		}
+	}
+}

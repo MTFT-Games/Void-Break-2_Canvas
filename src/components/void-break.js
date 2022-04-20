@@ -1,4 +1,4 @@
-import { Player } from "../classes.js";
+import { Player, Asteroid } from "../classes.js";
 import { testAABB } from "../utilities.js";
 
 //#region Canvas element
@@ -111,10 +111,10 @@ class VoidBreak extends HTMLElement {
 					ctx.globalAlpha = this.time / 2;
 					ctx.textAlign = 'center';
 					ctx.font = '40px Futura';
-					
+
 					// Calculate how big the box should be
 					let width = game.player.health.max < game.player.shield.max ? game.player.shield.max * 3 : game.player.health.max * 3;
-					
+
 					// Labels
 					ctx.fillStyle = 'white';
 					ctx.strokeStyle = '#cf0000';
@@ -161,7 +161,7 @@ class VoidBreak extends HTMLElement {
 					ctx.save();
 					ctx.translate(50, -canvas.height / 4 + 50);
 					ctx.scale(6, 6);
-					
+
 					// Ship
 					ctx.save();
 					ctx.rotate(45 * (Math.PI / 180));
@@ -318,7 +318,6 @@ class VoidBreak extends HTMLElement {
 		this.mouseState = 0;
 		this.lastMouseState = 0;
 		this.sounds = {};
-		this.asteroids = []; // TODO: maybe make an asteroid manager
 		this.player = new Player({ x: 0, y: 0 }, this);
 		this.state = 'loading';
 		this.loading = 0;
@@ -420,6 +419,8 @@ class VoidBreak extends HTMLElement {
 						this.player.reset();
 						this.tutorials.ui.activate();
 						this.tutorials.controls.activate();
+						this.asteroids = [];
+						this.score = 0;
 						this.state = 'game';
 					} else {
 						this.ctx.fillStyle = 'coral';
@@ -442,10 +443,35 @@ class VoidBreak extends HTMLElement {
 
 			case 'game':
 				this.player.update(deltaT);
-				// update asteroids
+
+				// Update asteroids
+				this.asteroids.forEach(a => { a.update(deltaT); });
+				this.asteroids = this.asteroids.filter(e => {
+					if (e.health > 0){
+						return true;
+					}
+					this.score++;
+					return false;
+				});
+
 				// tutorial update
 				for (const tutorial in this.tutorials) {
 					this.tutorials[tutorial].time -= deltaT;
+				}
+
+				// Spawn asteroids
+				// TODO: Add option to spawn waves
+				// TODO: Add some randomness to the size
+				while (this.asteroids.length < 3 + (this.score / 5)) {
+					let asteroidSpawnAngle = 360 * Math.random();
+					this.asteroids.push(new Asteroid(
+						20 + (this.score / 5),
+						{x:this.player.pos.x + (this.worldSize / 2) * Math.sin(asteroidSpawnAngle * (Math.PI / 180)),
+						y:this.player.pos.y + (this.worldSize / 2) * Math.cos(asteroidSpawnAngle * (Math.PI / 180))},
+						this.worldSize,
+						this.sounds,
+						() =>{return this.asteroids}
+					));
 				}
 
 				this.player.checkCollisions();
@@ -461,14 +487,26 @@ class VoidBreak extends HTMLElement {
 						this.ctx.save();
 						this.ctx.translate(this.worldSize * x, this.worldSize * y);
 
-						// Draw background
+						// Draw just background first so it doesnt cut off things at the seams
 						this.ctx.drawImage(this.images.purple5, 0, 0, this.worldSize, this.worldSize);
 
-						// draw asteroids
+						this.ctx.restore();
+					}
+				}
+				// Translate to each of the 9 copies of the world
+				for (let x = -1; x < 2; x++) {
+					for (let y = -1; y < 2; y++) {
+						this.ctx.save();
+						this.ctx.translate(this.worldSize * x, this.worldSize * y);
 
 						// Draw bullets
 						this.player.bullets.forEach(bullet => {
 							bullet.draw();
+						});
+
+						// draw asteroids
+						this.asteroids.forEach(a => {
+							a.draw(this.ctx);
 						});
 
 						this.ctx.restore();
