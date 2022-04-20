@@ -101,36 +101,209 @@ class VoidBreak extends HTMLElement {
 		//#region Tutorials
 		this.tutorials = {
 			ui: {
-				activate() { time = 10; }, time: 0, draw(game) {
+				activate() { this.time = 10; }, time: 0, draw(game) {
 					const canvas = game.canvas;
 					const ctx = game.ctx;
 
+					// Set context
 					ctx.save();
 					ctx.translate(canvas.width / 2, canvas.height - 50);
-
+					ctx.globalAlpha = this.time / 2;
 					ctx.textAlign = 'center';
-					ctx.font = '30px Futura';
+					ctx.font = '40px Futura';
+					
+					// Calculate how big the box should be
+					let width = game.player.health.max < game.player.shield.max ? game.player.shield.max * 3 : game.player.health.max * 3;
+					
+					// Labels
+					ctx.fillStyle = 'white';
+					ctx.strokeStyle = '#cf0000';
+					ctx.fillText("Health", -width / 2 - 65, 35);
+					ctx.strokeText("Health", -width / 2 - 65, 35);
+					ctx.strokeStyle = '#0000cf';
+					ctx.fillText("Shield", -width / 2 - 65, 0);
+					ctx.strokeText("Shield", -width / 2 - 65, 0);
 
-					ctx.fillStyle = '#cf0000';
+					// Outline
 					ctx.strokeStyle = 'white';
-					ctx.fillText("Health", 0, canvas.height / 2 + 200);
-					ctx.scale(3, 1);
-					//health bar outline
+					ctx.lineWidth = 4;
+					ctx.fillStyle = 'rgba(255,255,255,0.1)';
 					ctx.beginPath();
-					ctx.rect(-game.player.health.current / 2, 10, game.player.health.current, 20);
+					ctx.rect(-width / 2, -30, width, 80);
+					ctx.stroke();
+					ctx.fill();
+					ctx.restore();
+				}
+			},
+			controls: {
+				activate() { this.time = 10; }, time: 0, draw(game) {
+					const canvas = game.canvas;
+					const ctx = game.ctx;
+
+					// Set context
+					ctx.save();
+					ctx.translate(100, canvas.height / 2);
+					ctx.globalAlpha = this.time / 2;
+					ctx.font = '50px Futura';
+					ctx.strokeStyle = 'white';
+
+					// Box
+					ctx.save();
+					ctx.lineWidth = 5;
+					ctx.fillStyle = 'rgba(255,255,255,0.05)';
+					ctx.beginPath();
+					ctx.rect(0, -canvas.height / 4, 300, 300);
+					ctx.stroke();
+					ctx.fill();
+					ctx.restore();
+
+					//#region Draw turn icon
+					ctx.save();
+					ctx.translate(50, -canvas.height / 4 + 50);
+					ctx.scale(6, 6);
+					
+					// Ship
+					ctx.save();
+					ctx.rotate(45 * (Math.PI / 180));
+					ctx.fillStyle = 'white';
+					ctx.strokeStyle = 'white';
+					ctx.beginPath();
+					ctx.moveTo(0, -2);
+					ctx.lineTo(1.5, 2);
+					ctx.lineTo(0, 1);
+					ctx.lineTo(-1.5, 2);
+					ctx.closePath();
+					ctx.fill();
+					ctx.restore();
+
+					// Curves
+					ctx.beginPath();
+					ctx.arc(0, 0, 4.2, 180 * (Math.PI / 180), 270 * (Math.PI / 180));
 					ctx.stroke();
 
-					//shield bar
-					//background
-					// ctx.fillStyle = '#3f3f3f';
-					// ctx.beginPath();
-					// ctx.rect(-this.shield.max / 2, -20, this.shield.max, 20);
-					// ctx.fill();
-					// //forground
-					// ctx.fillStyle = '#0000cf';
-					// ctx.beginPath();
-					// ctx.rect(-this.shield.current / 2, -20, this.shield.current, 20);
-					// ctx.fill();
+					ctx.beginPath();
+					ctx.arc(0, 0, 4.2, 0 * (Math.PI / 180), 90 * (Math.PI / 180));
+					ctx.stroke();
+
+					// Arrows
+					ctx.beginPath();
+					ctx.moveTo(0, -4);
+					ctx.lineTo(-1, -3.5);
+					ctx.lineTo(-1, -4.5);
+					ctx.closePath();
+					ctx.stroke();
+
+					ctx.beginPath();
+					ctx.moveTo(0, 4);
+					ctx.lineTo(1, 3.5);
+					ctx.lineTo(1, 4.5);
+					ctx.closePath();
+					ctx.stroke();
+
+					ctx.restore();
+					//#endregion
+
+					//#region Thrust icon
+					ctx.save();
+					ctx.translate(50, -canvas.height / 4 + 150);
+					ctx.rotate(45 * (Math.PI / 180));
+					ctx.scale(6, 6);
+
+					ctx.fillStyle = 'white';
+					ctx.beginPath();
+					ctx.moveTo(0, -2);
+					ctx.lineTo(1.5, 2);
+					ctx.lineTo(0, 1);
+					ctx.lineTo(-1.5, 2);
+					ctx.closePath();
+					ctx.fill();
+
+					ctx.fillStyle = 'rgba(180,180,255, 0.8)';
+					ctx.beginPath();
+					ctx.moveTo(0, 1);
+					ctx.lineTo(-1.2, 3);
+					ctx.lineTo(0, 5);
+					ctx.lineTo(1.2, 3);
+					ctx.closePath();
+					ctx.fill();
+
+					ctx.restore();
+					//#endregion
+
+					//#region Fire icon
+					ctx.save();
+					ctx.translate(50, -canvas.height / 4 + 250);
+					ctx.rotate(45 * (Math.PI / 180));
+					ctx.save();
+					ctx.scale(6, 6);
+
+					ctx.fillStyle = 'white';
+					ctx.beginPath();
+					ctx.moveTo(0, -2);
+					ctx.lineTo(1.5, 2);
+					ctx.lineTo(0, 1);
+					ctx.lineTo(-1.5, 2);
+					ctx.closePath();
+					ctx.fill();
+					ctx.restore();
+
+					ctx.scale(2, 2);
+					ctx.fillStyle = 'white';
+					ctx.beginPath();
+					ctx.moveTo(0, -13);
+					ctx.lineTo(1.5, -9);
+					ctx.lineTo(0, -10);
+					ctx.lineTo(-1.5, -9);
+					ctx.closePath();
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.moveTo(0, -19);
+					ctx.lineTo(1.5, -15);
+					ctx.lineTo(0, -16);
+					ctx.lineTo(-1.5, -15);
+					ctx.closePath();
+					ctx.fill();
+
+					ctx.restore();
+					//#endregion
+
+					ctx.fillStyle = 'white';
+					ctx.lineWidth = 2;
+					ctx.lineJoin = 'round';
+					//#region Turning controls
+					ctx.fillText("A", 120, -canvas.height / 4 + 70)
+
+					// Box around letter
+					ctx.beginPath();
+					ctx.rect(113, -canvas.height / 4 + 30, 50, 50);
+					ctx.stroke();
+
+					ctx.fillText("D", 200, -canvas.height / 4 + 70)
+
+					// Box around letter
+					ctx.beginPath();
+					ctx.rect(193, -canvas.height / 4 + 30, 50, 50);
+					ctx.stroke();
+					//#endregion
+
+					//#region Thrust controls
+					ctx.fillText("W", 120, -canvas.height / 4 + 170)
+
+					// Box around letter
+					ctx.beginPath();
+					ctx.rect(117, -canvas.height / 4 + 128, 50, 50);
+					ctx.stroke();
+					//#endregion
+
+					//#region Fire controls
+					ctx.fillText("Space", 120, -canvas.height / 4 + 260)
+
+					// Box around letter
+					ctx.beginPath();
+					ctx.rect(117, -canvas.height / 4 + 220, 130, 58);
+					ctx.stroke();
+					//#endregion
 
 					ctx.restore();
 				}
@@ -246,6 +419,7 @@ class VoidBreak extends HTMLElement {
 					} else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
 						this.player.reset();
 						this.tutorials.ui.activate();
+						this.tutorials.controls.activate();
 						this.state = 'game';
 					} else {
 						this.ctx.fillStyle = 'coral';
@@ -271,7 +445,7 @@ class VoidBreak extends HTMLElement {
 				// update asteroids
 				// tutorial update
 				for (const tutorial in this.tutorials) {
-					this.tutorials.tutorial.time -= deltaT;
+					this.tutorials[tutorial].time -= deltaT;
 				}
 
 				this.player.checkCollisions();
@@ -301,6 +475,12 @@ class VoidBreak extends HTMLElement {
 					}
 				}
 				this.ctx.restore();
+				// tutorial draw
+				for (const tutorial in this.tutorials) {
+					if (this.tutorials[tutorial].time > 0) {
+						this.tutorials[tutorial].draw(this);
+					}
+				}
 				this.player.draw();
 				//#endregion
 				break;
