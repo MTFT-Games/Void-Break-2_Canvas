@@ -49,27 +49,31 @@ export class Player extends GameObject {
 	 */
 	reset() {
 		// TODO: use variable and make theses defaults changable
+		this.worldSize = this.game.worldSize;
+
 		// Motion stats
-		this.friction = 0.9;
+		this.friction = this.game.defaults.player.friction;
 		this.vel = { x: this.worldSize / 3, y: -this.worldSize / 3 };
-		this.thrust = 1200.0;
-		this.turnSpeed = 180.0;
+		this.thrust = this.game.defaults.player.thrust;
+		this.turnSpeed = this.game.defaults.player.turnSpeed;
 		this.turning = {cw: 0, ccw: 0};
 		this.thrusting = false;
 		this.angle = 45;
 		this.radius = 16;
 
 		// Health and shields
-		this.health = { max: 100, current: 100 };
-		this.shield = { max: 50, current: 50 };
-		this.damageCooldown = { max: 10, current: 0 };
+		this.health = { max: this.game.defaults.player.baseHealth, current: this.game.defaults.player.baseHealth };
+		this.shield = { max: this.game.defaults.player.baseShield, current: this.game.defaults.player.baseShield };
+		this.damageCooldown = { max: this.game.defaults.player.regenCooldown, current: 0 };
+		this.regenRate = this.game.defaults.player.regenRate;
 
 		// Shooting stats
-		this.projectiles = { count: 1, burst: 1, rate: 5.0, spread: 0, cooldown: 0 };
-		this.bullet = { type: "bullet", damage: 10, size: 1, speed: 600, enemy: false, lifetime: 2 };
+		this.projectiles = this.game.defaults.player.baseProjectiles;
+		this.bullet = this.game.defaults.player.baseBullet;
 		this.bullets = [];
 		this.firing = false;
 		this.startFiring = false;
+		this.bulletLimit = this.game.defaults.player.bulletLimit;
 	}
 
 	draw() {
@@ -194,7 +198,7 @@ export class Player extends GameObject {
 
 		//#region Regen if off cooldown
 		if (this.shield.current < this.shield.max && this.damageCooldown.current <= 0) {
-			this.shield.current += (this.shield.max / 15) * deltaT;
+			this.shield.current += (this.shield.max / this.regenRate) * deltaT;
 			if (this.shield.current > this.shield.max) {
 				this.shield.current = this.shield.max;
 			}
@@ -245,7 +249,7 @@ export class Player extends GameObject {
 	 */
 	shoot() {
 		// TODO: use a variable for the limit
-		if (this.bullets.length < 150) {
+		if (this.bullets.length < this.bulletLimit) {
 			this.bullets.push(new Bullet(this));
 		}
 		this.projectiles.cooldown += (1 / this.projectiles.rate);
@@ -428,6 +432,11 @@ export class Asteroid extends GameObject {
 	 * @param {*} amt
 	 */
 	damage(amt) {
+		// Prevent breaking a dead asteroid before its cleaned up
+		if (this.health <= 0) {
+			return;
+		}
+
 		// Damage
 		this.health -= amt;
 		this.sounds.hit1.play();

@@ -1,0 +1,49 @@
+{
+	"controls": {
+		"thrust": "W",
+		"turnCw": "D",
+		"turnCcw": "A",
+		"fire": "space"
+	},
+	"worldSize": 3000,
+	"asteroidSpawning": {
+		"minLimit": 3,
+		"scorePerLimit": 5,
+		"minSize": 40,
+		"scorePerSize": 2.5
+	},
+	"background": "purple5",
+	"player": {
+		"friction": 0.9,
+		"thrust": 1200,
+		"turnSpeed": 180,
+		"baseHealth": 100,
+		"baseShield": 50,
+		"regenCooldown": 10,
+		"regenRate": 15,
+		"baseProjectiles": {
+			"count": 1,
+			"burst": 1,
+			"rate": 5.0,
+			"spread": 0,
+			"cooldown": 0
+		},
+		"baseBullet": {
+			"type": "bullet",
+			"damage": 10,
+			"size": 1,
+			"speed": 600,
+			"enemy": false,
+			"lifetime": 2
+		},
+		"bulletLimit": 150
+	},
+	"asteroid": {
+		"asteroidVariance": 3.0,
+		"asteroidMinSpeed": 20,
+		"asteroidSpeedVariance": 2000,
+		"asteroidMinSplitSize": 20,
+		"asteroidSizePerFrag": 10,
+		"asteroidMaxFrag": 5
+	}
+}

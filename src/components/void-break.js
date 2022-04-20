@@ -452,6 +452,9 @@ class VoidBreak extends HTMLElement {
 					} else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
 						// TODO: Will likely need to make this a function later when the game 
 						// starts from multiple places
+						this.worldSize = this.defaults.worldSize;
+						this.background = this.defaults.background;
+						this.asteroidSpawning = this.defaults.asteroidSpawning;
 						this.player.reset();
 						this.tutorials.ui.activate();
 						this.tutorials.controls.activate();
@@ -501,11 +504,10 @@ class VoidBreak extends HTMLElement {
 				//#region Spawn asteroids
 				// TODO: Add option to spawn waves
 				// TODO: Add some randomness to the size
-				// TODO: Make this changable by using variables
-				while (this.asteroids.length < 3 + (this.score / 5)) {
+				while (this.asteroids.length < this.asteroidSpawning.minLimit + (this.score / this.asteroidSpawning.scorePerLimit)) {
 					let asteroidSpawnAngle = 360 * Math.random();
 					this.asteroids.push(new Asteroid(
-						40 + (this.score / 2.5),
+						this.asteroidSpawning.minSize + (this.score / this.asteroidSpawning.scorePerSize),
 						{
 							x: this.player.pos.x + (this.worldSize / 2) * Math.sin(asteroidSpawnAngle * (Math.PI / 180)),
 							y: this.player.pos.y + (this.worldSize / 2) * Math.cos(asteroidSpawnAngle * (Math.PI / 180))
@@ -537,7 +539,7 @@ class VoidBreak extends HTMLElement {
 						this.ctx.translate(this.worldSize * x, this.worldSize * y);
 
 						// Draw just background first so it doesn't cut off things at the seams
-						this.ctx.drawImage(this.images.purple5, 0, 0, this.worldSize, this.worldSize);
+						this.ctx.drawImage(this.images[this.defaults.background], 0, 0, this.worldSize, this.worldSize);
 
 						this.ctx.restore();
 					}
