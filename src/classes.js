@@ -92,37 +92,48 @@ export class Player extends GameObject {
 		ctx.lineTo(-1.5, 2);
 		ctx.closePath();
 		ctx.fill();
+		
+		if (this.thrusting) {
+			ctx.fillStyle = 'rgba(180,180,255, 0.8)';
+			ctx.beginPath();
+			ctx.moveTo(0, 1);
+			ctx.lineTo(-1.2, 3);
+			ctx.lineTo(0, 5);
+			ctx.lineTo(1.2, 3);
+			ctx.closePath();
+			ctx.fill();
+		}
 		ctx.restore();
 
 		// Draw ui
-		
+
 		//health and shield
 		ctx.save();
-		ctx.translate(canvas.width/2, canvas.height - 50);
+		ctx.translate(canvas.width / 2, canvas.height - 50);
 		ctx.scale(3, 1);
 
 		//health bar
 		//background
 		ctx.fillStyle = '#3f3f3f';
 		ctx.beginPath();
-		ctx.rect(-this.health.max/2, 10, this.health.max, 20);
+		ctx.rect(-this.health.max / 2, 10, this.health.max, 20);
 		ctx.fill();
 		//forground
 		ctx.fillStyle = '#cf0000';
 		ctx.beginPath();
-		ctx.rect(-this.health.current/2, 10, this.health.current, 20);
+		ctx.rect(-this.health.current / 2, 10, this.health.current, 20);
 		ctx.fill();
 
 		//shield bar
 		//background
 		ctx.fillStyle = '#3f3f3f';
 		ctx.beginPath();
-		ctx.rect(-this.shield.max/2, -20, this.shield.max, 20);
+		ctx.rect(-this.shield.max / 2, -20, this.shield.max, 20);
 		ctx.fill();
 		//forground
 		ctx.fillStyle = '#0000cf';
 		ctx.beginPath();
-		ctx.rect(-this.shield.current/2, -20, this.shield.current, 20);
+		ctx.rect(-this.shield.current / 2, -20, this.shield.current, 20);
 		ctx.fill();
 
 		ctx.restore();
@@ -286,7 +297,7 @@ class Bullet extends GameObject {
 
 		// Draw shape.
 		ctx.translate(this.pos.x, this.pos.y);
-		ctx.scale(2 * this.parent.bullet.size,2 * this.parent.bullet.size);
+		ctx.scale(2 * this.parent.bullet.size, 2 * this.parent.bullet.size);
 		if (this.parent.bullet.enemy) {
 			ctx.fillStyle = 'red';
 		} else {
