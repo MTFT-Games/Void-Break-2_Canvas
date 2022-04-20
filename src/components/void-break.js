@@ -21,12 +21,13 @@ class VoidBreak extends HTMLElement {
 	constructor() {
 		super();
 
-		// Add shadowroot
+		//#region Add shadowroot and get canvas
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.appendChild(template.content.cloneNode(true));
 
 		this.canvas = this.shadowRoot.querySelector('canvas');
 		this.ctx = this.canvas.getContext('2d');
+		//#endregion
 
 		//#region Resolution and autosizing
 		this.resolution = 1080; //TODO: Get this from localstorage or defaults json
@@ -37,6 +38,7 @@ class VoidBreak extends HTMLElement {
 		//#endregion
 
 		//#region Input
+		// Keep track of mouse position
 		this.canvas.onmousemove = (e) => {
 			// relationship bitmap vs. element
 			const scaleX = this.canvas.width / this.canvas.offsetWidth;
@@ -47,12 +49,19 @@ class VoidBreak extends HTMLElement {
 				y: (e.clientY - this.canvas.offsetTop) * scaleY
 			};
 		};
+
+		// Keep track of mouse buttons
 		this.canvas.onmousedown = this.canvas.onmouseup = (e) => {
 			this.mouseState = e.buttons;
 		};
+
+		// Prevent right click menu over the game
 		this.canvas.oncontextmenu = (e) => {
 			e.preventDefault();
 		};
+
+		// Keep track of keyboard
+		// TODO: Make the keys to check variables so they can be changed
 		document.onkeydown = (key) => {
 			switch (key.keyCode) {
 				case 87: // W
@@ -60,11 +69,11 @@ class VoidBreak extends HTMLElement {
 					break;
 
 				case 65: // A
-					this.player.turning = "ccw";
+					this.player.turning.ccw = 1;
 					break;
 
 				case 68: // D
-					this.player.turning = "cw";
+					this.player.turning.cw = 1;
 					break;
 
 				case 32: // space
@@ -84,8 +93,11 @@ class VoidBreak extends HTMLElement {
 					break;
 
 				case 65: // A
+					this.player.turning.ccw = 0;
+					break;
+
 				case 68: // D
-					this.player.turning = "";
+					this.player.turning.cw = 0;
 					break;
 
 				case 32: // space
@@ -115,7 +127,7 @@ class VoidBreak extends HTMLElement {
 					// Calculate how big the box should be
 					let width = game.player.health.max < game.player.shield.max ? game.player.shield.max * 3 : game.player.health.max * 3;
 
-					// Labels
+					//#region Labels
 					ctx.fillStyle = 'white';
 					ctx.strokeStyle = '#cf0000';
 					ctx.fillText("Health", -width / 2 - 65, 35);
@@ -123,15 +135,18 @@ class VoidBreak extends HTMLElement {
 					ctx.strokeStyle = '#0000cf';
 					ctx.fillText("Shield", -width / 2 - 65, 0);
 					ctx.strokeText("Shield", -width / 2 - 65, 0);
+					//#endregion
 
-					// Outline
+					//#region Outline
 					ctx.strokeStyle = 'white';
-					ctx.lineWidth = 4;
 					ctx.fillStyle = 'rgba(255,255,255,0.1)';
+					ctx.lineWidth = 4;
 					ctx.beginPath();
 					ctx.rect(-width / 2, -30, width, 80);
 					ctx.stroke();
 					ctx.fill();
+					//#endregion
+
 					ctx.restore();
 				}
 			},
@@ -147,7 +162,7 @@ class VoidBreak extends HTMLElement {
 					ctx.font = '50px Futura';
 					ctx.strokeStyle = 'white';
 
-					// Box
+					//#region Box
 					ctx.save();
 					ctx.lineWidth = 5;
 					ctx.fillStyle = 'rgba(255,255,255,0.05)';
@@ -156,17 +171,17 @@ class VoidBreak extends HTMLElement {
 					ctx.stroke();
 					ctx.fill();
 					ctx.restore();
+					//#endregion
 
 					//#region Draw turn icon
 					ctx.save();
 					ctx.translate(50, -canvas.height / 4 + 50);
 					ctx.scale(6, 6);
 
-					// Ship
+					//#region Ship
 					ctx.save();
 					ctx.rotate(45 * (Math.PI / 180));
 					ctx.fillStyle = 'white';
-					ctx.strokeStyle = 'white';
 					ctx.beginPath();
 					ctx.moveTo(0, -2);
 					ctx.lineTo(1.5, 2);
@@ -175,8 +190,9 @@ class VoidBreak extends HTMLElement {
 					ctx.closePath();
 					ctx.fill();
 					ctx.restore();
+					//#endregion
 
-					// Curves
+					//#region Curves
 					ctx.beginPath();
 					ctx.arc(0, 0, 4.2, 180 * (Math.PI / 180), 270 * (Math.PI / 180));
 					ctx.stroke();
@@ -184,8 +200,9 @@ class VoidBreak extends HTMLElement {
 					ctx.beginPath();
 					ctx.arc(0, 0, 4.2, 0 * (Math.PI / 180), 90 * (Math.PI / 180));
 					ctx.stroke();
+					//#endregion
 
-					// Arrows
+					//#region Arrows
 					ctx.beginPath();
 					ctx.moveTo(0, -4);
 					ctx.lineTo(-1, -3.5);
@@ -199,6 +216,7 @@ class VoidBreak extends HTMLElement {
 					ctx.lineTo(1, 4.5);
 					ctx.closePath();
 					ctx.stroke();
+					//#endregion
 
 					ctx.restore();
 					//#endregion
@@ -209,6 +227,7 @@ class VoidBreak extends HTMLElement {
 					ctx.rotate(45 * (Math.PI / 180));
 					ctx.scale(6, 6);
 
+					//#region Ship
 					ctx.fillStyle = 'white';
 					ctx.beginPath();
 					ctx.moveTo(0, -2);
@@ -217,7 +236,9 @@ class VoidBreak extends HTMLElement {
 					ctx.lineTo(-1.5, 2);
 					ctx.closePath();
 					ctx.fill();
+					//#endregion
 
+					//#region Thrust
 					ctx.fillStyle = 'rgba(180,180,255, 0.8)';
 					ctx.beginPath();
 					ctx.moveTo(0, 1);
@@ -226,6 +247,7 @@ class VoidBreak extends HTMLElement {
 					ctx.lineTo(1.2, 3);
 					ctx.closePath();
 					ctx.fill();
+					//#endregion
 
 					ctx.restore();
 					//#endregion
@@ -234,10 +256,11 @@ class VoidBreak extends HTMLElement {
 					ctx.save();
 					ctx.translate(50, -canvas.height / 4 + 250);
 					ctx.rotate(45 * (Math.PI / 180));
+					ctx.fillStyle = 'white';
+
+					//#region Ship
 					ctx.save();
 					ctx.scale(6, 6);
-
-					ctx.fillStyle = 'white';
 					ctx.beginPath();
 					ctx.moveTo(0, -2);
 					ctx.lineTo(1.5, 2);
@@ -246,9 +269,11 @@ class VoidBreak extends HTMLElement {
 					ctx.closePath();
 					ctx.fill();
 					ctx.restore();
+					//#endregion
 
+					//#region Bullets
 					ctx.scale(2, 2);
-					ctx.fillStyle = 'white';
+
 					ctx.beginPath();
 					ctx.moveTo(0, -13);
 					ctx.lineTo(1.5, -9);
@@ -264,6 +289,7 @@ class VoidBreak extends HTMLElement {
 					ctx.lineTo(-1.5, -15);
 					ctx.closePath();
 					ctx.fill();
+					//#endregion
 
 					ctx.restore();
 					//#endregion
@@ -271,6 +297,7 @@ class VoidBreak extends HTMLElement {
 					ctx.fillStyle = 'white';
 					ctx.lineWidth = 2;
 					ctx.lineJoin = 'round';
+
 					//#region Turning controls
 					ctx.fillText("A", 120, -canvas.height / 4 + 70)
 
@@ -311,10 +338,11 @@ class VoidBreak extends HTMLElement {
 		};
 		//#endregion
 
-		// init
-		document.defaultView.onresize();
+		//#region Init
+		document.defaultView.onresize(); // Set initial resolution
+
 		this.mousePos = { x: 0, y: 0 };
-		this.worldSize = 3000; // TODO set this
+		this.worldSize = 3000;
 		this.mouseState = 0;
 		this.lastMouseState = 0;
 		this.sounds = {};
@@ -322,13 +350,14 @@ class VoidBreak extends HTMLElement {
 		this.state = 'loading';
 		this.loading = 0;
 		this.lastFrameTime = window.performance.now() / 1000.0;
+
 		this.loop();
+		//#endregion
 	}
 
-	// Draw a loading screen
+	// Draw a loading screen (Probably doesn't need to be it's own function)
 	drawLoading(percent, time) {
 		this.ctx.save();
-
 		this.ctx.fillStyle = 'white';
 		this.ctx.strokeStyle = 'white';
 
@@ -363,10 +392,11 @@ class VoidBreak extends HTMLElement {
 	loop() {
 		requestAnimationFrame(() => this.loop());
 
-		// Keep time
+		//#region Keep time
 		const frameTime = window.performance.now() / 1000.0;
 		const deltaT = frameTime - this.lastFrameTime;
 		this.lastFrameTime = frameTime;
+		//#endregion
 
 		// Clear
 		this.ctx.fillStyle = 'black';
@@ -396,26 +426,32 @@ class VoidBreak extends HTMLElement {
 				this.ctx.strokeStyle = 'white';
 				this.ctx.textAlign = 'center';
 				this.ctx.font = '300px Futura';
+
 				this.ctx.fillText("VOID", this.canvas.width / 2, this.canvas.height / 2 - 300);
 				this.ctx.strokeText("VOID", this.canvas.width / 2, this.canvas.height / 2 - 300);
 				this.ctx.fillText("BREAK", this.canvas.width / 2, this.canvas.height / 2 - 80);
 				this.ctx.strokeText("BREAK", this.canvas.width / 2, this.canvas.height / 2 - 80);
+
 				this.ctx.restore();
 				//#endregion
 
 				//#region Start button TODO: Maybe make it a reusable function to draw and check a button
 				this.ctx.save();
+				this.ctx.fillStyle = 'red';
 
 				// Debug show hitbox
-				this.ctx.fillStyle = 'red';
 				//this.ctx.fillRect(this.canvas.width / 2 - 90, this.canvas.height / 2 + 130, 185, 75);
 
 				//#region Test for mouse hover and click
-				if (testAABB({ x: this.mousePos.x, y: this.mousePos.y, w: 0, h: 0 },
+				if (testAABB(
+					{ x: this.mousePos.x, y: this.mousePos.y, w: 0, h: 0 },
 					{ x: this.canvas.width / 2 - 90, y: this.canvas.height / 2 + 130, w: 185, h: 75 })) {
+
 					if (this.mouseState % 2 == 1) {
 						this.ctx.fillStyle = 'darkRed';
 					} else if (this.lastMouseState % 2 == 1 && this.mouseState % 2 == 0) {
+						// TODO: Will likely need to make this a function later when the game 
+						// starts from multiple places
 						this.player.reset();
 						this.tutorials.ui.activate();
 						this.tutorials.controls.activate();
@@ -432,8 +468,10 @@ class VoidBreak extends HTMLElement {
 				this.ctx.strokeStyle = 'white';
 				this.ctx.textAlign = 'center';
 				this.ctx.font = '100px Futura';
+
 				this.ctx.fillText("Start", this.canvas.width / 2, this.canvas.height / 2 + 200);
 				this.ctx.strokeText("Start", this.canvas.width / 2, this.canvas.height / 2 + 200);
+
 				this.ctx.restore();
 				//#endregion
 				//#endregion
@@ -442,57 +480,69 @@ class VoidBreak extends HTMLElement {
 				break;
 
 			case 'game':
+				//#region Updates
 				this.player.update(deltaT);
 
 				// Update asteroids
 				this.asteroids.forEach(a => { a.update(deltaT); });
 				this.asteroids = this.asteroids.filter(e => {
-					if (e.health > 0){
+					if (e.health > 0) {
 						return true;
 					}
 					this.score++;
 					return false;
 				});
 
-				// tutorial update
+				// Update tutorials
 				for (const tutorial in this.tutorials) {
 					this.tutorials[tutorial].time -= deltaT;
 				}
 
-				// Spawn asteroids
+				//#region Spawn asteroids
 				// TODO: Add option to spawn waves
 				// TODO: Add some randomness to the size
+				// TODO: Make this changable by using variables
 				while (this.asteroids.length < 3 + (this.score / 5)) {
 					let asteroidSpawnAngle = 360 * Math.random();
 					this.asteroids.push(new Asteroid(
-						20 + (this.score / 5),
-						{x:this.player.pos.x + (this.worldSize / 2) * Math.sin(asteroidSpawnAngle * (Math.PI / 180)),
-						y:this.player.pos.y + (this.worldSize / 2) * Math.cos(asteroidSpawnAngle * (Math.PI / 180))},
+						40 + (this.score / 2.5),
+						{
+							x: this.player.pos.x + (this.worldSize / 2) * Math.sin(asteroidSpawnAngle * (Math.PI / 180)),
+							y: this.player.pos.y + (this.worldSize / 2) * Math.cos(asteroidSpawnAngle * (Math.PI / 180))
+						},
 						this.worldSize,
 						this.sounds,
-						() =>{return this.asteroids}
+						() => { return this.asteroids }
 					));
 				}
+				//#endregion
+				//#endregion
 
+				// Collisions
 				this.player.checkCollisions();
 
 				//#region Draw
 				this.ctx.save();
-				// Translate to world origin
-				this.ctx.translate(this.canvas.width / 2 - this.player.pos.x, this.canvas.height / 2 - this.player.pos.y);
 
-				// Translate to each of the 9 copies of the world
+				//#region Translate to world origin
+				this.ctx.save();
+				this.ctx.translate(
+					this.canvas.width / 2 - this.player.pos.x, 
+					this.canvas.height / 2 - this.player.pos.y);
+
+				// Draw the 9 backgrounds
 				for (let x = -1; x < 2; x++) {
 					for (let y = -1; y < 2; y++) {
 						this.ctx.save();
 						this.ctx.translate(this.worldSize * x, this.worldSize * y);
 
-						// Draw just background first so it doesnt cut off things at the seams
+						// Draw just background first so it doesn't cut off things at the seams
 						this.ctx.drawImage(this.images.purple5, 0, 0, this.worldSize, this.worldSize);
 
 						this.ctx.restore();
 					}
 				}
+
 				// Translate to each of the 9 copies of the world
 				for (let x = -1; x < 2; x++) {
 					for (let y = -1; y < 2; y++) {
@@ -512,14 +562,25 @@ class VoidBreak extends HTMLElement {
 						this.ctx.restore();
 					}
 				}
+
 				this.ctx.restore();
-				// tutorial draw
+				//#endregion
+
+				// Draw tutorials
 				for (const tutorial in this.tutorials) {
 					if (this.tutorials[tutorial].time > 0) {
 						this.tutorials[tutorial].draw(this);
 					}
 				}
+
 				this.player.draw();
+
+				// Draw UI
+				this.ctx.fillStyle = 'white';
+				this.ctx.font = '40px Futura';
+				this.ctx.fillText("Score: " + this.score, 10, 50);
+
+				this.ctx.restore();
 				//#endregion
 				break;
 

@@ -48,17 +48,14 @@ export class Player extends GameObject {
 	 * Resets player to initial state ready for a new game.
 	 */
 	reset() {
+		// TODO: use variable and make theses defaults changable
 		// Motion stats
 		this.friction = 0.9;
 		this.vel = { x: this.worldSize / 3, y: -this.worldSize / 3 };
 		this.thrust = 1200.0;
 		this.turnSpeed = 180.0;
-		this.turning = "";
+		this.turning = {cw: 0, ccw: 0};
 		this.thrusting = false;
-
-		// Position
-		//this.x = 0;
-		//this.y = worldSize;
 		this.angle = 45;
 		this.radius = 16;
 
@@ -69,7 +66,7 @@ export class Player extends GameObject {
 
 		// Shooting stats
 		this.projectiles = { count: 1, burst: 1, rate: 5.0, spread: 0, cooldown: 0 };
-		this.bullet = { type: "bullet", damage: 5, size: 1, speed: 400, enemy: false, lifetime: 2 };
+		this.bullet = { type: "bullet", damage: 10, size: 1, speed: 600, enemy: false, lifetime: 2 };
 		this.bullets = [];
 		this.firing = false;
 		this.startFiring = false;
@@ -79,12 +76,13 @@ export class Player extends GameObject {
 		const canvas = this.game.canvas;
 		const ctx = this.game.ctx;
 
+		//#region Draw ship
 		ctx.save();
 		ctx.translate(canvas.width / 2, canvas.height / 2);
 		ctx.rotate(this.angle * (Math.PI / 180));
 		ctx.scale(8, 8);
 
-		// Draw shape
+		//#region Draw body
 		ctx.fillStyle = 'white';
 		ctx.beginPath();
 		ctx.moveTo(0, -2);
@@ -93,7 +91,9 @@ export class Player extends GameObject {
 		ctx.lineTo(-1.5, 2);
 		ctx.closePath();
 		ctx.fill();
-		
+		//#endregion
+
+		//#region Draw thrust
 		if (this.thrusting) {
 			ctx.fillStyle = 'rgba(180,180,255, 0.8)';
 			ctx.beginPath();
@@ -104,40 +104,46 @@ export class Player extends GameObject {
 			ctx.closePath();
 			ctx.fill();
 		}
+		//#endregion
+
 		ctx.restore();
+		//#endregion
 
-		// Draw ui
-
-		//health and shield
+		//#region Draw player ui
 		ctx.save();
 		ctx.translate(canvas.width / 2, canvas.height - 50);
 		ctx.scale(3, 1);
 
-		//health bar
-		//background
+		//#region Health bar
+		// Background
 		ctx.fillStyle = '#3f3f3f';
 		ctx.beginPath();
 		ctx.rect(-this.health.max / 2, 10, this.health.max, 20);
 		ctx.fill();
-		//forground
+		
+		// Forground
 		ctx.fillStyle = '#cf0000';
 		ctx.beginPath();
 		ctx.rect(-this.health.current / 2, 10, this.health.current, 20);
 		ctx.fill();
+		//#endregion
 
-		//shield bar
-		//background
+		//#region Shield bar
+		// Background
 		ctx.fillStyle = '#3f3f3f';
 		ctx.beginPath();
 		ctx.rect(-this.shield.max / 2, -20, this.shield.max, 20);
 		ctx.fill();
-		//forground
+		
+		// Forground
 		ctx.fillStyle = '#0000cf';
 		ctx.beginPath();
 		ctx.rect(-this.shield.current / 2, -20, this.shield.current, 20);
 		ctx.fill();
 
 		ctx.restore();
+		//#endregion
+		//#endregion
 	}
 
 	/**
@@ -149,19 +155,18 @@ export class Player extends GameObject {
 	update(deltaT) {
 		// Turn
 		// TODO: Maybe add a tiny hint of momentum to turning.
-		if (this.turning == "cw") {
-			this.angle += this.turnSpeed * deltaT;
-		} else if (this.turning == "ccw") {
-			this.angle -= this.turnSpeed * deltaT;
-		}
+		this.angle += this.turnSpeed * deltaT * (this.turning.cw - this.turning.ccw);
 
-		// Friction
+		//#region Friction
 		this.vel.x *= 1 - (this.friction * deltaT);
 		this.vel.y *= 1 - (this.friction * deltaT);
+
+		// Set 0 because floating point
 		if (this.vel.x * this.vel.x + this.vel.y * this.vel.y < 0.01) {
 			this.vel.x = 0;
 			this.vel.y = 0;
 		}
+		//#endregion
 
 		// Thrust
 		if (this.thrusting) {
@@ -169,14 +174,15 @@ export class Player extends GameObject {
 			this.vel.y -= this.thrust * deltaT * Math.cos(this.angle * (Math.PI / 180));
 		}
 
+		// Move and wrap
 		super.update(deltaT);
 
 		// Cooldowns
 		this.damageCooldown.current -= deltaT;
 		this.projectiles.cooldown -= deltaT;
 
-		// Shoot
-		if (this.startFiring) {
+		//#region Shoot
+		if (this.startFiring && this.projectiles.cooldown <= 0) {
 			this.startFiring = false;
 			this.firing = true;
 			this.projectiles.cooldown = 0;
@@ -184,14 +190,16 @@ export class Player extends GameObject {
 		while (this.firing && this.projectiles.cooldown <= 0) {
 			this.shoot();
 		}
+		//#endregion
 
-		// Regen if off cooldown
+		//#region Regen if off cooldown
 		if (this.shield.current < this.shield.max && this.damageCooldown.current <= 0) {
 			this.shield.current += (this.shield.max / 15) * deltaT;
 			if (this.shield.current > this.shield.max) {
 				this.shield.current = this.shield.max;
 			}
 		}
+		//#endregion
 
 		// Update bullets
 		this.bullets.forEach(bullet => {
@@ -202,7 +210,6 @@ export class Player extends GameObject {
 
 	checkCollisions() {
 		this.game.asteroids.forEach(asteroid => {
-			//TODO update collision check, import it, make sure this has the right stats, update asteroid class
 			if (simpleCircleCollisionCheck(this, asteroid)) {
 				// Get direction from player to the asteroid
 				let impactDirection = { x: asteroid.pos.x - this.pos.x, y: asteroid.pos.y - this.pos.y };
@@ -237,6 +244,7 @@ export class Player extends GameObject {
 	 * Spawns and launches bullets according to the projectile settings.
 	 */
 	shoot() {
+		// TODO: use a variable for the limit
 		if (this.bullets.length < 150) {
 			this.bullets.push(new Bullet(this));
 		}
@@ -266,7 +274,8 @@ export class Player extends GameObject {
 
 			// Check for death.
 			if (this.health.current <= 0) {
-				this.game.state = 'game over'; // TODO maybe something fancier later
+				this.game.state = 'game over'; 
+				// TODO maybe something fancier later. animate a flower thing?
 			}
 		}
 	}
@@ -306,6 +315,7 @@ class Bullet extends GameObject {
 		} else {
 			ctx.fillStyle = 'white';
 		}
+
 		ctx.beginPath();
 		ctx.moveTo(0, -2);
 		ctx.lineTo(1.5, 2);
@@ -313,6 +323,7 @@ class Bullet extends GameObject {
 		ctx.lineTo(-1.5, 2);
 		ctx.closePath();
 		ctx.fill();
+
 		ctx.restore();
 	}
 
@@ -321,12 +332,12 @@ class Bullet extends GameObject {
 	 *
 	 * Apply velocity, screen wrap, check collision, and tick down lifetime.
 	 *
-	 * @param {*} _dt Probably not necessary since dt is script scope.
+	 * @param {*} deltaT Delta time.
 	 */
 	update(deltaT) {
 		super.update(deltaT);
 
-		// Tick down lifetime and delete if up.
+		// Tick down lifetime.
 		this.lifetime -= deltaT;
 	}
 
@@ -351,7 +362,7 @@ export class Asteroid extends GameObject {
 		this.points = [];
 
 		// Set settings
-		this.radius = 2*size;
+		this.radius = size;
 		let delta = this.radius / 3.0;
 		let min = this.radius - (delta / 2.0);
 		let degreeStepMin = 5;
@@ -384,7 +395,7 @@ export class Asteroid extends GameObject {
 		this.asteroids = array;
 
 		// Randomize velocity
-		let speed = 10 + (Math.random() * (1000 / this.radius));
+		let speed = 20 + (Math.random() * (2000 / this.radius));
 		this.vel = {
 			x: speed * Math.sin(this.angle * (Math.PI / 180)),
 			y: speed * Math.cos(this.angle * (Math.PI / 180))
@@ -435,7 +446,7 @@ export class Asteroid extends GameObject {
 				}
 				let divisions = Math.floor(2 + (Math.random() * (maxDivisions - 1)));
 				for (let i = 0; i < divisions; i++) {
-					this.asteroids().push(new Asteroid(this.radius / 2 / divisions, this.pos, this.worldSize, this.sounds, this.asteroids));
+					this.asteroids().push(new Asteroid(this.radius / divisions, this.pos, this.worldSize, this.sounds, this.asteroids));
 				}
 			}
 		}
