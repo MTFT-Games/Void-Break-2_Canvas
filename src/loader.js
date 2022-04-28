@@ -6,7 +6,7 @@ const loadingTotal = 6.0;
 
 const imageSources = {
 	purple5: 'media/images/backgrounds/large/purple/purple-nebula-5.jpg',
-	purple6: 'media/images/backgrounds/large/purple/purple-nebula-6.png'
+	purple6: 'media/images/backgrounds/large/purple/purple-nebula-6.jpg'
 };
 
 // Load sounds
